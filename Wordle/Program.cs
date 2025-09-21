@@ -9,6 +9,9 @@ builder.Services.AddDbContext<WordleContext>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSession();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -37,5 +40,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.UseSession();
 
 app.Run();

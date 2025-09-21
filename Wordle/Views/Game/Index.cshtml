@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Wordle Game";
+    var guesses = ViewData["Guesses"] as List<List<(char Letter, string Color)>> ?? new();
+    int maxRows = 6;
+    int wordLength = 5;
+}
+
+<h2>Wordle Game</h2>
+
+<form method="post" autocomplete="off">
+    <table class="table table-bordered" style="width:fit-content;">
+        @for (int row = 0; row < maxRows; row++)
+        {
+            <tr>
+                @if (row < guesses.Count)
+                {
+                    var guess = guesses[row];
+                    for (int col = 0; col < wordLength; col++)
+                    {
+                        var color = guess[col].Color ?? "white";
+                        <td style="width:40px; height:40px; text-align:center; background:@color; color:white; font-weight:bold;">
+                            @guess[col].Letter.ToString().ToUpper()
+                        </td>
+                    }
+                }
+                else
+                {
+                    for (int col = 0; col < wordLength; col++)
+                    {
+                        <td style="width:40px; height:40px; text-align:center;"></td>
+                    }
+                }
+            </tr>
+        }
+    </table>
+    <input type="text" name="guess" id="guess" maxlength="5" pattern="[a-z]{5}" title="5 lowercase letters" required
+           style="text-transform:lowercase;" />
+    <button type="submit" class="btn btn-primary">Guess</button>
+</form>
+
+                   

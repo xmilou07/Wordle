@@ -21,6 +21,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Created)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TimesGuessed)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -36,6 +39,8 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Created)
             </td>
+            <td>
+                    @Html.DisplayFor(modelItem => item.TimesGuessed)
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |

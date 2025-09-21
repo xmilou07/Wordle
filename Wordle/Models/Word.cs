@@ -8,5 +8,6 @@ namespace Wordle.Models
         public string Letters { get; set; } = string.Empty;
         public int Length { get; set; }
         public DateTime Created { get; set; } = DateTime.Now;
+        public int TimesGuessed { get; set; } = 0;
     }
 }

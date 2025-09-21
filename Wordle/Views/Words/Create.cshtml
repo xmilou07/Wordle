@@ -28,6 +28,11 @@
                 <span asp-validation-for="Created" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="TimesGuessed" class="control-label"></label>
+                <input asp-for="TimesGuessed" class="form-control" />
+                <span asp-validation-for="TimesGuessed" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>
