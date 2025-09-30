@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http; // Add this using directive
+using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
-using System.Text.Json; // Add this using directive
+using System.Text.Json;
 
 namespace Wordle.Controllers
 {
@@ -21,17 +21,40 @@ namespace Wordle.Controllers
 
     public class GameController : Controller
     {
-        private const string TargetWord = "apple"; // For demo, use a static word
+        private static readonly List<string> WordList = new() { "apple", "grape", "peach", "lemon", "mango" };
+        private const string TargetWordSessionKey = "TargetWord";
+        private const string GuessesSessionKey = "Guesses";
+        private const string WordIndexSessionKey = "WordIndex";
 
-        // Store guesses in session for demo purposes
+        private string GetTargetWord()
+        {
+            var word = HttpContext.Session.GetString(TargetWordSessionKey);
+            if (string.IsNullOrEmpty(word))
+            {
+                HttpContext.Session.SetInt32(WordIndexSessionKey, 0);
+                word = WordList[0];
+                HttpContext.Session.SetString(TargetWordSessionKey, word);
+            }
+            return word;
+        }
+
+        private void SetNextWord()
+        {
+            int index = HttpContext.Session.GetInt32(WordIndexSessionKey) ?? 0;
+            index = (index + 1) % WordList.Count;
+            HttpContext.Session.SetInt32(WordIndexSessionKey, index);
+            HttpContext.Session.SetString(TargetWordSessionKey, WordList[index]);
+            HttpContext.Session.Remove(GuessesSessionKey);
+        }
+
         private List<List<(char Letter, string Color)>> GetGuesses()
         {
-            return HttpContext.Session.GetObject<List<List<(char, string)>>>("Guesses") ?? new List<List<(char, string)>>();
+            return HttpContext.Session.GetObject<List<List<(char, string)>>>(GuessesSessionKey) ?? new List<List<(char, string)>>();
         }
 
         private void SaveGuesses(List<List<(char, string)>> guesses)
         {
-            HttpContext.Session.SetObject("Guesses", guesses);
+            HttpContext.Session.SetObject(GuessesSessionKey, guesses);
         }
 
         [HttpGet]
@@ -44,14 +67,15 @@ namespace Wordle.Controllers
         [HttpPost]
         public IActionResult Index(string guess)
         {
+            var targetWord = GetTargetWord();
             var guesses = GetGuesses();
 
-            if (!string.IsNullOrEmpty(guess) && guess.Length == TargetWord.Length)
+            if (!string.IsNullOrEmpty(guess) && guess.Length == targetWord.Length)
             {
                 var result = new List<(char, string)>();
-                var targetChars = TargetWord.ToCharArray();
+                var targetChars = targetWord.ToCharArray();
                 var guessChars = guess.ToLower().ToCharArray();
-                var used = new bool[TargetWord.Length];
+                var used = new bool[targetWord.Length];
 
                 // First pass: green
                 for (int i = 0; i < guessChars.Length; i++)
@@ -83,6 +107,15 @@ namespace Wordle.Controllers
                     result[i] = (guessChars[i], found ? "orange" : "red");
                 }
                 guesses.Add(result);
+
+                // If the guess is correct, move to the next word
+                if (guess.ToLower() == targetWord)
+                {
+                    SetNextWord();
+                    guesses = new List<List<(char, string)>>();
+                    TempData["Message"] = "Correct! Moving to the next word.";
+                }
+
                 SaveGuesses(guesses);
             }
             else
